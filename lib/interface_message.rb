@@ -1,5 +1,6 @@
+# Interface
 class InterfaceMessage
-  def send(message, receive)
-    fail NotImplementedError, "method not implemented"
+  def send(_message, _receive)
+    raise NotImplementedError, 'method not implemented'
   end
 end

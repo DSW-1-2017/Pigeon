@@ -1,17 +1,18 @@
 require_relative 'simple.rb'
 require_relative 'pub_sub.rb'
-
+# rubocop:disable Style/ClassVars
+# This class has invoker of sender methods and has controll of executation
 class MessageList
   attr_accessor :interface_message
-  @@SIMPLE = 0
-  @@PUBSUB = 1
+  @@simple = 0
+  @@pub_sub = 1
 
   def self.simple
-    @@SIMPLE
+    @@simple
   end
 
   def self.pub_sub
-    @@PUBSUB
+    @@pub_sub
   end
 
   def initialize
@@ -26,17 +27,18 @@ class MessageList
 
   # type = 0 => simple, 1 => pubsub
   def add_message(message, receive, type)
-    hash = Hash.new
+    hash = {}
 
     case type
     when 0
-      hash = {type: Simple.new, message: message, receive:receive}
+      hash = { type: Simple.new, message: message, receive: receive }
     when 1
-      hash = {type: PubSub.new, message: message, receive:receive}
+      hash = { type: PubSub.new, message: message, receive: receive }
     else
-      fail NotImplementedError, "type not implemented"
+      raise NotImplementedError, 'type not implemented'
     end
 
     interface_message.push(hash)
   end
 end
+# rubocop:enable Style/ClassVars

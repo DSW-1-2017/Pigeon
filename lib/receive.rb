@@ -1,3 +1,5 @@
+# This class contain configuration of receive and implementation methods
+# of communication
 class Receive
   attr_accessor :ip_address
   attr_accessor :call_name
@@ -7,7 +9,9 @@ class Receive
     @ip_address = ip_address
   end
 
-  def send_simple(message)
+  def send_simple(message, channel)
+    queue = channel.queue(@call_name)
+    channel.default_exchange.publish(message, routing_key: queue.name)
     puts "send simple '#{message}'"
   end
 
