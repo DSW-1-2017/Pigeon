@@ -3,7 +3,7 @@ module Pigeon
 
 	module Connection
 		# Create Template Method
-		def self.create_connection(hostname)
+		def self.start(hostname)
 			@connection = Bunny.new(hostname: hostname)
 	    	@connection.start
 		end
@@ -51,14 +51,15 @@ module Pigeon
 
 	# This class implements simple connection mode
 	class Simple < MessageCommand
-	  def connect(receive)
-	    @connection = Bunny.new(hostname: receive.ip_address)
-	    @connection.start
-	    puts "connect simple #{receive.ip_address}"
-	  end
+		include Connection
+	  # def connect(receive)
+	  #   @connection = Bunny.new(hostname: receive.ip_address)
+	  #   @connection.start
+	  #   puts "connect simple #{receive.ip_address}"
+	  # end
 
-	  def send(message, receive)
-	    connect(receive)
+	  def send(message, receiver)
+	    @connection = Connection::start(receiver.hostname)
 	    channel = @connection.create_channel
 	    receive.send_simple(message, channel)
 	    @connection.close
@@ -67,11 +68,11 @@ module Pigeon
 
 	# This class implements PubSub connection mode
 	class PubSub < MessageCommand
-	  def connect(receive)
+	  def connect(receiver)
 	    puts "connect pub_sub #{receive.ip_address}"
 	  end
 
-	  def send(message, receive)
+	  def send(message, receiver)
 	    connect(receive)
 	    receive.send_pubsub(message)
 	  end
@@ -80,14 +81,14 @@ module Pigeon
 	# This class contain configuration of receive and implementation methods
 	# of communication
 	class Receiver
-		include Connection
-	  attr_accessor :host
-	  attr_accessor :call_name
+	  include Connection
+	  attr_accessor :hostname
+	  attr_accessor :queue
 
-	  # def initialize(call_name, host)
-	  #   @call_name = call_name
-	  #   @host = host
-	  # end
+	  def initialize(queue, hostname)
+	    @queue = queue
+	    @hostname = hostname
+	  end
 
 	  def send_simple(message, queue)
 	    queue = channel.queue(queue)

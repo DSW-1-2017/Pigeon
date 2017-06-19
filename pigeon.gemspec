@@ -8,6 +8,6 @@ Gem::Specification.new do |s|
   s.email       = 'wparaujo7@gmail.com'
   s.files       = ['lib/pigeon.rb']
   s.license = 'MIT'
-  s.add_dependency 'bunny'
+  s.add_dependency 'bunny', '~> 2.7'
   # spec.add_development_dependency 'rspec'
 end
