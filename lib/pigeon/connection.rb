@@ -11,7 +11,7 @@ module Pigeon
 		# A connection initialized from bunny.
 		def start(hostname='localhost')
 			@connection = Bunny.new(hostname: hostname)
-	    	@connection.start
+      @connection.start
 		end
 
 		# Close an open connection.

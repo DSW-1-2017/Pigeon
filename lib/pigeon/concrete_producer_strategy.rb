@@ -10,8 +10,8 @@ module Pigeon
 
 		# Set the name of queue for communications.
 		# @param queue [String] set the name of queue to created it. 
-		def set_queue(queue)
-			@queue = @channel.queue(queue)
+		def setup(identifier)
+			@queue = @channel.queue(identifier)
 		end
 
 		# Overwrite the send method of superclass ProducerStrategy to simple communication algorithm.
@@ -34,8 +34,8 @@ module Pigeon
 
 		# Set the name of exchange to start it.
 		# @param exchange_name [String] the name of exchange that will be created.
-		def set_exchange(exchange_name)
-			@exchange = @channel.fanout(exchange_name)
+		def setup(identifier)
+			@exchange = @channel.fanout(identifier)
 		end
 
 		# Overwrite the method send to adapt to the context publisher/subscriber communication.
