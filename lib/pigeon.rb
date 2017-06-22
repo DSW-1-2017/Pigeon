@@ -8,10 +8,7 @@ module Pigeon
 
 	# Context of producers strategies. The client that send a message use this.
 	class ProducerCommunication
-		# Communication of type simple.
-		attr_accessor :simple
-		# Communication of type pubsub.
-		attr_accessor :pubsub
+		attr_accessor :communicator
 
 		# @param communication [Symbol] The type of communication to send and receive messages.
 		# @param hostname [String] name of host do connect with the other module.
@@ -23,19 +20,16 @@ module Pigeon
 		def create_producer(communication_type, hostname)
 			case communication_type
 			when :simple
-				@simple = Pigeon::SimpleProducer.new(hostname)
+				@communicator = Pigeon::SimpleProducer.new(hostname)
 			when :pubsub
-				@pubsub = Pigeon::PubSubProducer.new(hostname)
+				@communicator = Pigeon::PubSubProducer.new(hostname)
 			end
 		end
 	end
 
 	# Context of consumers strategies. The client that receive a message must to use this.
 	class ConsumerCommunication
-		# Receiver of type simple.
-		attr_accessor :simple
-		# Communication of type pubsub.
-		attr_accessor :pubsub
+		attr_accessor :communicator
 
 		# @param communication [Symbol] The type of communication to send and receive messages.
 		# @param hostname [String] name of host do connect with the other module.
@@ -47,9 +41,9 @@ module Pigeon
 		def create_consumer(communication_type, hostname)
 			case communication_type
 			when :simple
-				@simple = Pigeon::SimpleConsumer.new(hostname)
+				@communicator = Pigeon::SimpleConsumer.new(hostname)
 			when :pubsub
-				@pubsub = Pigeon::PubSubConsumer.new(hostname)
+				@communicator = Pigeon::PubSubConsumer.new(hostname)
 			end
 		end
 	end
