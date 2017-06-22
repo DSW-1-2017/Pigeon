@@ -21,7 +21,8 @@ module Pigeon
           yield(q_delivery_info, q_properties, q_body)
         end
       rescue Interrupt => _
-        #[TODO] Should be implemented
+        @channel.close
+        @connection.close
       end
     end
 	end
