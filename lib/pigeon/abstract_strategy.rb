@@ -19,6 +19,11 @@ module Pigeon
 		def send(message)
 			raise NotImplementedError
 		end
+
+		def setup(identifier)
+			raise NotImplementedError
+		end
+
 	end
 
 
@@ -38,7 +43,11 @@ module Pigeon
 			@channel = @connection.create_channel
 		end
 
-		def listen_queue(queue)
+		def listen(identifier)
+			raise NotImplementedError
+		end
+
+		def subscribe
 			raise NotImplementedError
 		end
 	end
