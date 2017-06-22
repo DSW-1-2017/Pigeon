@@ -2,7 +2,7 @@ module Pigeon
 	require 'bunny'
 
 	module Connection
-		def start(hostname)
+		def start(hostname='localhost')
 			@connection = Bunny.new(hostname: hostname)
 	    	@connection.start
 		end
@@ -14,36 +14,38 @@ module Pigeon
 
 	# Context of strategies.
 	class ProducerCommunication
-		attr_accessor :simple
+		attr_accessor :simple, :pubsub
 
 		def initialize(communication, hostname)
 			case communication
 			when :simple
 				@simple = Pigeon::SimpleProducer.new(hostname)
 			when :pubsub
+				@pubsub = Pigeon::PubSubProducer.new(hostname)
 			end
 		end
 
-		def send(message, queue)
-			@simple.send(message, queue)
-		end
+		# def send(message, queue)
+		# 	@simple.send(message, queue)
+		# end
 	end
 
 	class ConsumerCommunication
-		attr_accessor :simple
-		attr_accessor :queue
+		attr_accessor :simple, :pubsub
+		# attr_accessor :queue
 
 		def initialize(communication, hostname)
 			case communication
 			when :simple
-				@simple = Pigeon::SimpleProducer.new(hostname)
+				@simple = Pigeon::SimpleConsumer.new(hostname)
 			when :pubsub
+				@pubsub = Pigeon::PubSubConsumer.new(hostname)
 			end
 		end
 
-		def listen_queue(queue)
-			@queue = @simple.channel.queue(queue)
-		end
+		# def listen_queue(queue)
+		# 	@queue = @simple.channel.queue(queue)
+		# end
 	end
 
 	# Abstract Strategies.
@@ -56,11 +58,7 @@ module Pigeon
 			@channel = @connection.create_channel
 		end
 
-		def send(message, queue)
-			raise NotImplementedError
-		end
-
-		def create_queue(queue)
+		def send(message)
 			raise NotImplementedError
 		end
 	end
@@ -69,7 +67,7 @@ module Pigeon
 		include Connection
 		attr_accessor :connection, :channel
 
-		def initialize(hostname)
+		def initialize(hostname='localhost')
 			@connection = self.start hostname
 			@channel = @connection.create_channel
 		end
@@ -81,23 +79,43 @@ module Pigeon
 
 	# Concrete Producer Strategies.
 	class SimpleProducer < ProducerStrategy
-		
+		attr_accessor :queue
+
 		def initialize(hostname)
 			super
 		end
 
-		def send(message, queue)
-			queue = @channel.queue(queue)
-			@channel.default_exchange.publish(message, routing_key: queue.name)
+		def set_queue(queue)
+			@queue = @channel.queue(queue)
+		end
+
+		def send(message)
+			@channel.default_exchange.publish(message, routing_key: @queue.name)
+			@connection.close
 		end
 	end
 
 	class PubSubProducer < ProducerStrategy
+		attr_accessor :exchange
+
+		def initialize(hostname)
+			super
+		end
+
+		def set_exchange(exchange_name)
+			@exchange = @channel.fanout(exchange_name)
+		end
+
+		def send(message)
+			@exchange.publish(message)
+			@connection.close
+		end
 	end
 
 	# Concrete Consumer/Receiver Strategies
 	class SimpleConsumer < ConsumerStrategy
-		
+		attr_accessor :queue
+
 		def initialize(hostname)
 			super
 		end
@@ -108,5 +126,16 @@ module Pigeon
 	end
 
 	class PubSubConsumer< ConsumerStrategy
+		attr_accessor :queue
+
+		def initialize(hostname)
+			super
+			@queue = @channel.queue("", exclusive: true)
+		end
+
+		def create_bind(exchange_name)
+			@exchange = @channel.fanout(exchange_name)
+			@queue.bind(@exchange)
+		end
 	end
 end
