@@ -1,14 +1,7 @@
-require_relative 'lib/receive.rb'
-require_relative 'lib/message_list.rb'
+require_relative 'lib/pigeon.rb'
 
-ml = MessageList.new
-rec = Receive.new('ligacao1', 'localhost')
-
-# simple_message
-ml.add_message('mensagem que será recebida no simple', rec, MessageList.simple)
-
-# pub_sub_message
-ml.add_message('mensagem que será recebida no p_s', rec, MessageList.pub_sub)
-
-# send all messages
-ml.send
+#Example
+#You only need to change :simple to :pubsub in client.rb and server.rb
+producer = Pigeon::ProducerCommunication.new(:simple, 'localhost')
+producer.communicator.setup('x')
+producer.communicator.send("hello")
