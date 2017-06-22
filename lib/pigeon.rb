@@ -20,12 +20,9 @@ module Pigeon
 			case communication
 			when :simple
 				@simple = Pigeon::SimpleProducer.new(hostname)
+				# @simple.send(message, queue)
 			when :pubsub
 			end
-		end
-
-		def send(message, queue)
-			@simple.send(message, queue)
 		end
 	end
 
@@ -56,7 +53,7 @@ module Pigeon
 			@channel = @connection.create_channel
 		end
 
-		def send(message, queue)
+		def send(message, queue='default')
 			raise NotImplementedError
 		end
 
@@ -86,7 +83,7 @@ module Pigeon
 			super
 		end
 
-		def send(message, queue)
+		def send(message, queue='default')
 			queue = @channel.queue(queue)
 			@channel.default_exchange.publish(message, routing_key: queue.name)
 		end
