@@ -11,10 +11,21 @@ module Pigeon
 
 		# Set the queue that consumer will be wait messages.
 		# @param queue [String] the name of queue.
-		def listen_queue(queue)
-			@channel.queue(queue)
+		def listen(identifier)
+			@queue = @channel.queue(identifier)
 		end
+
+    def subscribe
+      begin
+        @queue.subscribe(block: true) do |q_delivery_info, q_properties, q_body|
+          yield(q_delivery_info, q_properties, q_body)
+        end
+      rescue Interrupt => _
+        #[TODO] Should be implemented
+      end
+    end
 	end
+
 	# Concrete receiver strategy implementation of Publisher/Subscriber communication.
 	class PubSubConsumer< ConsumerStrategy
 		# Control the queue of receivers messages to consumer bind. 
@@ -28,9 +39,20 @@ module Pigeon
 
 		# Create the bind to exchange where receiver the messages sends by producer.
 		# @param exchange_name [String] the name of exchange to create it.
-		def create_bind(exchange_name)
-			@exchange = @channel.fanout(exchange_name)
+		def listen(identifier)
+			@exchange = @channel.fanout(identifier)
 			@queue.bind(@exchange)
 		end
+
+    def subscribe
+      begin
+        @queue.subscribe(block: true) do |q_delivery_info, q_properties, q_body|
+          yield(q_delivery_info, q_properties, q_body)
+        end
+      rescue Interrupt => _
+        @channel.close
+        @connection.close
+      end
+    end
 	end
 end
