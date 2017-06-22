@@ -1,141 +1,56 @@
+require 'pigeon/connection'
+require 'pigeon/abstract_strategy'
+require 'pigeon/concrete_producer_strategy'
+require 'pigeon/concrete_consumer_strategy'
+
 module Pigeon
 	require 'bunny'
 
-	module Connection
-		def start(hostname='localhost')
-			@connection = Bunny.new(hostname: hostname)
-	    	@connection.start
-		end
-
-		def close
-			@connection.close
-		end
-	end
-
-	# Context of strategies.
+	# Context of producers strategies. The client that send a message use this.
 	class ProducerCommunication
-		attr_accessor :simple, :pubsub
+		# Communication of type simple.
+		attr_accessor :simple
+		# Communication of type pubsub.
+		attr_accessor :pubsub
 
+		# @param communication [Symbol] The type of communication to send and receive messages.
+		# @param hostname [String] name of host do connect with the other module.
 		def initialize(communication, hostname)
-			case communication
+			create_producer(communication, hostname)
+		end
+
+		private
+		def create_producer(communication_type, hostname)
+			case communication_type
 			when :simple
 				@simple = Pigeon::SimpleProducer.new(hostname)
 			when :pubsub
 				@pubsub = Pigeon::PubSubProducer.new(hostname)
 			end
 		end
-
-		# def send(message, queue)
-		# 	@simple.send(message, queue)
-		# end
 	end
 
+	# Context of consumers strategies. The client that receive a message must to use this.
 	class ConsumerCommunication
-		attr_accessor :simple, :pubsub
-		# attr_accessor :queue
+		# Receiver of type simple.
+		attr_accessor :simple
+		# Communication of type pubsub.
+		attr_accessor :pubsub
 
+		# @param communication [Symbol] The type of communication to send and receive messages.
+		# @param hostname [String] name of host do connect with the other module.
 		def initialize(communication, hostname)
-			case communication
+			create_consumer(communication, hostname)
+		end
+
+		private
+		def create_consumer(communication_type, hostname)
+			case communication_type
 			when :simple
 				@simple = Pigeon::SimpleConsumer.new(hostname)
 			when :pubsub
 				@pubsub = Pigeon::PubSubConsumer.new(hostname)
 			end
-		end
-
-		# def listen_queue(queue)
-		# 	@queue = @simple.channel.queue(queue)
-		# end
-	end
-
-	# Abstract Strategies.
-	class ProducerStrategy
-		include Connection
-		attr_accessor :connection, :channel
-
-		def initialize(hostname)
-			@connection = self.start hostname
-			@channel = @connection.create_channel
-		end
-
-		def send(message)
-			raise NotImplementedError
-		end
-	end
-
-	class ConsumerStrategy
-		include Connection
-		attr_accessor :connection, :channel
-
-		def initialize(hostname='localhost')
-			@connection = self.start hostname
-			@channel = @connection.create_channel
-		end
-
-		def listen_queue(queue)
-			raise NotImplementedError
-		end
-	end
-
-	# Concrete Producer Strategies.
-	class SimpleProducer < ProducerStrategy
-		attr_accessor :queue
-
-		def initialize(hostname)
-			super
-		end
-
-		def set_queue(queue)
-			@queue = @channel.queue(queue)
-		end
-
-		def send(message)
-			@channel.default_exchange.publish(message, routing_key: @queue.name)
-			@connection.close
-		end
-	end
-
-	class PubSubProducer < ProducerStrategy
-		attr_accessor :exchange
-
-		def initialize(hostname)
-			super
-		end
-
-		def set_exchange(exchange_name)
-			@exchange = @channel.fanout(exchange_name)
-		end
-
-		def send(message)
-			@exchange.publish(message)
-			@connection.close
-		end
-	end
-
-	# Concrete Consumer/Receiver Strategies
-	class SimpleConsumer < ConsumerStrategy
-		attr_accessor :queue
-
-		def initialize(hostname)
-			super
-		end
-
-		def listen_queue(queue)
-			@channel.queue(queue)
-		end
-	end
-
-	class PubSubConsumer< ConsumerStrategy
-		attr_accessor :queue
-
-		def initialize(hostname)
-			super
-			@queue = @channel.queue("", exclusive: true)
-		end
-
-		def create_bind(exchange_name)
-			@exchange = @channel.fanout(exchange_name)
-			@queue.bind(@exchange)
 		end
 	end
 end
