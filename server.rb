@@ -1,16 +1,10 @@
-require 'bunny'
-connection = Bunny.new
-connection.start
+require_relative 'lib/pigeon.rb'
 
-channel = connection.create_channel
-queue = channel.queue('ligacao1')
-
-begin
-  puts ' [*] Waiting for messages. To exit press CTRL+C'
-  queue.subscribe(block: true) do |_delivery_info, _properties, body|
-    puts " [x] Received: #{body}"
-  end
-rescue Interrupt => _
-  connection.close
-  exit(0)
+#Example
+#You only need to change :simple to :pubsub in client.rb and server.rb
+receiver = Pigeon::ConsumerCommunication.new(:rpc, 'localhost')
+receiver.communicator.listen('x')
+receiver.communicator.subscribe do |info, properties, body|
+  puts "[X] #{body}"
+  "Server's response!"
 end
