@@ -1,3 +1,4 @@
+require 'pigeon/error/pigeon_errors'
 require 'pigeon/lib/connection'
 require 'pigeon/consumer/consumer_strategy'
 require 'pigeon/consumer/simple_consumer'
@@ -30,6 +31,8 @@ module Pigeon
 				@communicator = Producer::PubSubProducer.new(hostname)
 			when :rpc
 				@communicator = Producer::RPCProducer.new(hostname)
+      else
+        raise Error::InvalidProducerType
 			end
 		end
 	end
@@ -48,11 +51,13 @@ module Pigeon
 		def create_consumer(communication_type, hostname)
 			case communication_type
 			when :simple
-				@communicator = Cunsumer::SimpleConsumer.new(hostname)
+				@communicator = Consumer::SimpleConsumer.new(hostname)
 			when :pubsub
 				@communicator = Consumer::PubSubConsumer.new(hostname)
 			when :rpc
 				@communicator = Consumer::RPCConsumer.new(hostname)
+      else
+        raise Error::InvalidConsumerType
 			end
 		end
 	end

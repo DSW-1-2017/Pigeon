@@ -11,11 +11,14 @@ module Pigeon
       # Create the bind to exchange where receiver the messages sends by producer.
       # @param exchange_name [String] the name of exchange to create it.
       def listen(identifier)
+        raise Error::IdentifierTypeError unless identifier.is_a? String
         @queue = @channel.queue(identifier)
         @exchange = @channel.default_exchange
       end
 
       def subscribe
+        raise Error::ConsumerSetupError if @queue.nil?
+        raise Error::ConsumerSetupError if @exchange.nil?
         begin
           @queue.subscribe(block: true) do |q_delivery_info, q_properties, q_body|
             response = yield(q_delivery_info, q_properties, q_body)
@@ -28,6 +31,7 @@ module Pigeon
         rescue Interrupt => _
           @channel.close
           @connection.close
+          raise Error::UnexpectedInterruption
         end
       end
     end

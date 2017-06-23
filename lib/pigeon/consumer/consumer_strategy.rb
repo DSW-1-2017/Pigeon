@@ -12,6 +12,7 @@ module Pigeon
       # Start the connections and create a channel. The value default is localhost.
       # @param hostname [String] name of hostname to start the connection.
       def initialize(hostname='localhost')
+        raise Error::HostnameTypeError unless hostname.is_a? String
         @connection = self.start hostname
         @channel = @connection.create_channel
       end

@@ -18,12 +18,15 @@ module Pigeon
       # Set the name of exchange to start it.
       # @param exchange_name [String] the name of exchange that will be created.
       def setup(identifier)
+        raise Error::IdentifierTypeError unless identifier.is_a? String
         @server_queue_name = identifier
         @exchange = @channel.default_exchange
       end
 
       # Overwrite the method send to adapt to the context publisher/subscriber communication.
       def send(message)
+        raise Error::MessageTypeError unless message.is_a? String
+        raise Error::ProducerSetupError if @exchange.nil?
         handle_response
         response = call(message)
         yield(response)
@@ -59,6 +62,7 @@ module Pigeon
           rescue Interrupt => _
             @channel.close
             @connection.close
+            raise Error::UnexpectedInterruption
           end
         end
     end
