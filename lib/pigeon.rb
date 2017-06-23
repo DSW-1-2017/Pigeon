@@ -1,7 +1,12 @@
-require 'pigeon/connection'
-require 'pigeon/abstract_strategy'
-require 'pigeon/concrete_producer_strategy'
-require 'pigeon/concrete_consumer_strategy'
+require 'pigeon/lib/connection'
+require 'pigeon/consumer/consumer_strategy'
+require 'pigeon/consumer/simple_consumer'
+require 'pigeon/consumer/pubsub_consumer'
+require 'pigeon/consumer/rpc_consumer'
+require 'pigeon/producer/producer_strategy'
+require 'pigeon/producer/simple_producer'
+require 'pigeon/producer/pubsub_producer'
+require 'pigeon/producer/rpc_producer'
 
 module Pigeon
 	require 'bunny'
@@ -20,11 +25,11 @@ module Pigeon
 		def create_producer(communication_type, hostname)
 			case communication_type
 			when :simple
-				@communicator = Pigeon::SimpleProducer.new(hostname)
+				@communicator = Producer::SimpleProducer.new(hostname)
 			when :pubsub
-				@communicator = Pigeon::PubSubProducer.new(hostname)
+				@communicator = Producer::PubSubProducer.new(hostname)
 			when :rpc
-				@communicator = Pigeon::RPCProducer.new(hostname)
+				@communicator = Producer::RPCProducer.new(hostname)
 			end
 		end
 	end
@@ -43,11 +48,11 @@ module Pigeon
 		def create_consumer(communication_type, hostname)
 			case communication_type
 			when :simple
-				@communicator = Pigeon::SimpleConsumer.new(hostname)
+				@communicator = Cunsumer::SimpleConsumer.new(hostname)
 			when :pubsub
-				@communicator = Pigeon::PubSubConsumer.new(hostname)
+				@communicator = Consumer::PubSubConsumer.new(hostname)
 			when :rpc
-				@communicator = Pigeon::RPCConsumer.new(hostname)
+				@communicator = Consumer::RPCConsumer.new(hostname)
 			end
 		end
 	end
