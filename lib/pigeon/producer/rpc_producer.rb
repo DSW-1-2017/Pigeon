@@ -2,10 +2,12 @@ require "thread"
 
 module Pigeon
   module Producer
-    # Concrete producer strategy implementation of Publisher/Subscriber communication.
+    # Concrete producer strategy implementation of RPC communication.
     class RPCProducer < ProducerStrategy
       attr_reader :server_queue_name
+      # RPC gives client a response (response) by an specific id (call_id)
       attr_accessor :response, :call_id
+      # Mutexes to handler race conditions
       attr_reader :lock, :condition
 
       def initialize(hostname)
@@ -16,7 +18,7 @@ module Pigeon
       end
 
       # Set the name of exchange to start it.
-      # @param exchange_name [String] the name of exchange that will be created.
+      # @param identifier [String] the name of exchange that will be created.
       def setup(identifier)
         raise Error::IdentifierTypeError unless identifier.is_a? String
         @server_queue_name = identifier
@@ -33,10 +35,13 @@ module Pigeon
       end
 
       private
+        # Method to generate a random identifier to the server's response
+        # header
         def generate_uuid
           "#{rand}#{rand}#{rand}"
         end
 
+        # Send a message and wait for a server's response signal
         def call(message)
           self.call_id = generate_uuid
 
@@ -50,6 +55,11 @@ module Pigeon
           self.response
         end
 
+        # Create a recursive listener to execute yield block declared by
+        # user for each message loaded from reply_queue.
+        # RPC protocol gives clien a response according to the return of
+        # the yield block on the server side. Block the mutex until there
+        # is a response.
         def handle_response
           begin
             that = self

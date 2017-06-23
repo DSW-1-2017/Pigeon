@@ -11,7 +11,7 @@ module Pigeon
       end
 
       # Set the name of exchange to start it.
-      # @param exchange_name [String] the name of exchange that will be created.
+      # @param identifier [String] the name of exchange that will be created.
       def setup(identifier)
         raise Error::IdentifierTypeError unless identifier.is_a? String
         @exchange = @channel.fanout(identifier)

@@ -10,13 +10,14 @@ module Pigeon
       end
 
       # Set the name of queue for communications.
-      # @param queue [String] set the name of queue to created it. 
+      # @param identifier [String] set the name of queue to created it.
       def setup(identifier)
         raise Error::IdentifierTypeError unless identifier.is_a? String
         @queue = @channel.queue(identifier)
       end
 
-      # Overwrite the send method of superclass ProducerStrategy to simple communication algorithm.
+      # Overwrite the send method of superclass ProducerStrategy to simple
+      # communication algorithm.
       # @param message [String] the message to be send to receiver.
       def send(message)
         raise Error::MessageTypeError unless message.is_a? String

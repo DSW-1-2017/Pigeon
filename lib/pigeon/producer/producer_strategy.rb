@@ -22,6 +22,10 @@ module Pigeon
         raise NotImplementedError
       end
 
+      # Abstract method to setup client configuration according to the
+      # specification of the server.
+      # @param identifier [String] a parameter to match some configurations
+      # on the server side.
       def setup(identifier)
         raise NotImplementedError
       end

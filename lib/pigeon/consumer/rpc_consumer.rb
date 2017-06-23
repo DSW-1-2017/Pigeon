@@ -16,6 +16,10 @@ module Pigeon
         @exchange = @channel.default_exchange
       end
 
+      # Create a recursive listener to execute yield block declared by
+      # user for each message loaded from queue.
+      # RPC protocol gives clien a response according to the return of
+      # the yield block.
       def subscribe
         raise Error::ConsumerSetupError if @queue.nil?
         raise Error::ConsumerSetupError if @exchange.nil?

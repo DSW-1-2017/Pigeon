@@ -11,12 +11,14 @@ module Pigeon
       end
 
       # Set the queue that consumer will be wait messages.
-      # @param queue [String] the name of queue.
+      # @param identifier [String] the name of queue.
       def listen(identifier)
         raise Error::IdentifierTypeError unless identifier.is_a? String
         @queue = @channel.queue(identifier)
       end
 
+      # Create a recursive listener to execute yield block declared by
+      # user for each message loaded from queue.
       def subscribe
         raise Error::ConsumerSetupError if @queue.nil?
         begin
