@@ -23,6 +23,8 @@ module Pigeon
 				@communicator = Pigeon::SimpleProducer.new(hostname)
 			when :pubsub
 				@communicator = Pigeon::PubSubProducer.new(hostname)
+			when :rpc
+				@communicator = Pigeon::RPCProducer.new(hostname)
 			end
 		end
 	end
@@ -44,6 +46,8 @@ module Pigeon
 				@communicator = Pigeon::SimpleConsumer.new(hostname)
 			when :pubsub
 				@communicator = Pigeon::PubSubConsumer.new(hostname)
+			when :rpc
+				@communicator = Pigeon::RPCConsumer.new(hostname)
 			end
 		end
 	end
